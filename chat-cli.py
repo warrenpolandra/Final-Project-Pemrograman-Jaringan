@@ -62,12 +62,10 @@ class ChatClient:
             receivemsg = ""
             while True:
                 data = self.sock.recv(64)
-                print("diterima dari server", data)
-                if (data):
+                if data:
                     # data harus didecode agar dapat di operasikan dalam bentuk string
                     receivemsg = "{}{}" . format(receivemsg, data.decode())
                     if receivemsg[-4:] == '\r\n\r\n':
-                        print("end of string")
                         return json.loads(receivemsg)
         except:
             self.sock.close()
@@ -102,7 +100,7 @@ class ChatClient:
         if result['status'] == 'OK':
             return "message sent to {}" . format(usernameto)
         else:
-            return "Error, {}" . format(result['message'])
+            return "Error: {}" . format(result['message'])
 
     def send_message_to_server(self, serverid, usernameto, message):
         if self.tokenid == "":
@@ -122,7 +120,7 @@ class ChatClient:
         if result['status'] == 'OK':
             return "{}" . format(json.dumps(result['messages']))
         else:
-            return "Error, {}" . format(result['message'])
+            return "Error: {}" . format(result['message'])
 
     def sendgroupmessage(self, group_id="xxx", message="xxx"):
         if self.tokenid == "":
@@ -133,7 +131,7 @@ class ChatClient:
         if result['status'] == 'OK':
             return "message sent to {}" . format(group_id)
         else:
-            return "Error, {}" . format(result['message'])
+            return "Error: {}" . format(result['message'])
 
 
 if __name__ == "__main__":
@@ -149,5 +147,5 @@ if __name__ == "__main__":
 
     cc = ChatClient(server)
     while True:
-        cmdline = input("Command {}:" . format(cc.tokenid))
+        cmdline = input("Command: ")
         print(cc.proses(cmdline))
