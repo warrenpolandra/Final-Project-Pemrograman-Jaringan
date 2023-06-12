@@ -142,7 +142,11 @@ class Chat:
             return {'status': 'OK'}
 
     def add_server(self, server_id, server_ip, server_port):
+        if server_id in self.servers:
+            return {'status': 'ERROR', 'message': 'Server {} is already exist'.format(server_id)}
+
         self.servers[server_id] = ServerToServerThread(self, server_ip, server_port)
+        return {'status': 'OK'}
 
     def send_message(self, sessionid, username_from, username_dest, message):
         if sessionid not in self.sessions:
