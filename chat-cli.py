@@ -56,7 +56,7 @@ class ChatClient:
                 return self.sendgroupmessage(group_id, message)
             elif command == 'sendfile':
                 address = j[1].strip()
-                filename = j[1].strip()
+                filename = j[2].strip()
                 return self.send_file(address, filename)
             elif command == 'inbox':
                 return self.inbox()
