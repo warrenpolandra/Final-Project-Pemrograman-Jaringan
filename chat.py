@@ -90,7 +90,7 @@ class Chat:
                 server_id = j[1].strip()
                 server_ip = j[2].strip()
                 server_port = j[3].strip()
-
+                return self.add_server(server_id, server_ip, server_port)
             elif command == 'sendserver':
                 sessionid = j[1].strip()
                 server_id = j[2].strip()
