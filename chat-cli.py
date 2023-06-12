@@ -54,6 +54,10 @@ class ChatClient:
                 for w in j[2:]:
                     message = "{} {}" . format(message, w)
                 return self.sendgroupmessage(group_id, message)
+            elif command == 'sendfile':
+                address = j[1].strip()
+                filename = j[1].strip()
+                return self.send_file(address, filename)
             elif command == 'inbox':
                 return self.inbox()
             else:
@@ -132,23 +136,29 @@ class ChatClient:
         string = "inbox {} \r\n" . format(self.tokenid)
         result = self.sendstring(string)
         if result['status'] == 'OK':
-            message = json.loads(result['messages'])
-            lineker = message['lineker']
-            # return "{}" . format(json.dumps(result['messages']))
-            return "{}" . format(lineker)
+            return "{}" . format(json.dumps(result['messages']))
         else:
             return "Error: {}" . format(result['message'])
 
     def sendgroupmessage(self, group_id="xxx", message="xxx"):
         if self.tokenid == "":
-            return "Error, not authorized"
+            return "Error: not authorized"
         string = "sendgroup {} {} {} {}\r\n" . format(self.tokenid, group_id, self.server, message)
-        print(string)
         result = self.sendstring(string)
         if result['status'] == 'OK':
-            return "message sent to {}" . format(group_id)
+            return "Message sent to {}" . format(group_id)
         else:
             return "Error: {}" . format(result['message'])
+
+    def send_file(self, address, filename):
+        if self.tokenid == "":
+            return "Error: not authorized"
+        string = "sendfile {} {} {}\r\n" . format(self.tokenid, address, filename)
+        result = self.sendstring(string)
+        if result['status'] == 'OK':
+            return 'File {} sent to {}'.format(filename, address)
+        else:
+            return 'Error: {}'.format(result['message'])
 
 
 if __name__ == "__main__":

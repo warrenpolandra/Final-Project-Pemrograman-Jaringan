@@ -6,6 +6,7 @@ import logging
 from queue import Queue
 import threading
 import socket
+import base64
 import traceback
 
 
@@ -113,6 +114,14 @@ class Chat:
                 for w in j[3:]:
                     message = "{} {}".format(message, w)
                 return self.server_inbox(username_from, username_to, message)
+            elif command == 'sendfile':
+                sessionid = j[1].strip()
+                address = j[2].strip()
+                filename = j[3].strip()
+                address_split = address.split('@')
+                username_to = address_split[0].strip()
+                server_id = address_split[1].strip()
+                return self.send_file(sessionid, username_to, server_id, filename)
             else:
                 return {'status': 'ERROR', 'message': '**Protocol Tidak Benar'}
         except KeyError:
@@ -243,6 +252,33 @@ class Chat:
         username_from = self.sessions[sessionid]['username']
         self.servers[server_id].put('server_inbox {} {} {}'.format(username_from, username_to, message))
         return {'status': 'OK', 'message': 'Message Sent to Server'}
+
+    def send_file(self, sessionid, username_to, server_id, filename):
+        if sessionid not in self.sessions:
+            return {'status': 'ERROR', 'message': 'Session Tidak Ditemukan'}
+        if username_to not in self.users:
+            return {'status': 'ERROR', 'message': 'Session Tidak Ditemukan'}
+        if server_id not in self.servers:
+            return {'status': 'ERROR', 'message': 'Server Tidak Ada'}
+        username_from = self.sessions[sessionid]['username']
+        path_from = username_from + '/'
+        path_to = username_to + '/'
+        os.chdir(path_from)
+
+        if os.path.exists(filename):
+            fp = open(f"{filename}", 'rb')
+            isi_file = base64.b64encode(fp.read())
+            os.chdir(path_to)
+            if os.path.exists(f"{filename}"):
+                return {'status': 'ERROR', 'message': 'File sudah ada di user {}' .format(username_to)}
+            fp_new = open(filename, 'wb+')
+            fp_new.write(isi_file)
+            fp_new.close()
+            return {'status': 'OK', 'message': 'File terkirim'}
+        else:
+            return {'status': 'ERROR', 'message': 'File tidak ada'}
+
+
 
 
 if __name__ == "__main__":
