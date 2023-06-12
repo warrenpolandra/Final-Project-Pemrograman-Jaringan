@@ -269,6 +269,7 @@ class Chat:
         if os.path.exists(filename):
             fp = open(f"{filename}", 'rb')
             isi_file = fp.read()
+            fp.close()
             os.chdir(path_to)
             if os.path.exists(f"{filename}"):
                 return {'status': 'ERROR', 'message': 'File sudah ada di user {}' .format(username_to)}
