@@ -60,6 +60,13 @@ class Chat:
                 password = j[2].strip()
                 logging.warning("AUTH: auth {} {}".format(username, password))
                 return self.autentikasi_user(username, password)
+            elif command == 'register':
+                username = j[1].strip()
+                password = j[2].strip()
+                return self.register_user(username, password)
+            elif command == 'logout':
+                tokenid = j[1].strip()
+                return self.logout(tokenid)
             elif command == 'send':
                 sessionid = j[1].strip()
                 usernameto = j[2].strip()
@@ -122,6 +129,15 @@ class Chat:
                 username_to = address_split[0].strip()
                 server_id = address_split[1].strip()
                 return self.send_file(sessionid, username_to, server_id, filename)
+            elif command == 'sendfilegroup':
+                sessionid = j[1].strip()
+                groupid = j[2].strip()
+                filename = j[3].strip()
+                return self.send_file_group(sessionid, groupid, filename)
+            elif command == 'creategroup':
+                group_id = j[1].strip()
+                members = j[2].strip()
+                return self.create_group(group_id, members)
             else:
                 return {'status': 'ERROR', 'message': '**Protocol Tidak Benar'}
         except KeyError:
@@ -137,6 +153,23 @@ class Chat:
         tokenid = str(uuid.uuid4())
         self.sessions[tokenid] = {'username': username, 'userdetail': self.users[username]}
         return {'status': 'OK', 'tokenid': tokenid}
+
+    def register_user(self, username, password):
+        if username in self.users:
+            return {'status': 'ERROR', 'message': 'User Sudah Ada'}
+        self.users[username] = {'nama': username, 'negara': 'Inggris', 'password': password, 'incoming': {},
+                                'outgoing': {}}
+        os.chdir('files/')
+        os.mkdir(username)
+        os.chdir('../')
+        return {'status': 'OK', 'message': 'user registered'}
+
+    def logout(self, tokenid):
+        if tokenid in self.sessions:
+            del self.sessions[tokenid]
+            return {'status': 'OK', 'message': "User logged out"}
+        else:
+            return {'status': 'ERROR', 'message': "Session not found"}
 
     def get_user(self, username):
         if username not in self.users:
@@ -195,7 +228,7 @@ class Chat:
         if s_fr is False:
             return {'status': 'ERROR', 'message': 'User Tidak Ditemukan'}
         if username_from + '@' + server_from not in self.groups[group_id]:
-            return {'status': 'ERROR', 'message': 'User Tidak Ada dalam {}' .format(group_id)}
+            return {'status': 'ERROR', 'message': 'User Tidak Ada dalam {}'.format(group_id)}
         sent_id = []
 
         for member in self.groups[group_id]:
@@ -257,14 +290,14 @@ class Chat:
         if sessionid not in self.sessions:
             return {'status': 'ERROR', 'message': 'Session Tidak Ditemukan'}
         if username_to not in self.users:
-            return {'status': 'ERROR', 'message': 'Session Tidak Ditemukan'}
+            return {'status': 'ERROR', 'message': 'User Tujuan Tidak Ditemukan'}
         if server_id not in self.servers:
             return {'status': 'ERROR', 'message': 'Server Tidak Ada'}
         username_from = self.sessions[sessionid]['username']
         path_from = 'files/' + username_from + '/'
         path_to = '../' + username_to + '/'
+        print(os.path.abspath(path_from))
         os.chdir(path_from)
-        logging.warning("filename:{}:".format(filename))
 
         if os.path.exists(filename):
             fp = open(f"{filename}", 'rb')
@@ -272,13 +305,63 @@ class Chat:
             fp.close()
             os.chdir(path_to)
             if os.path.exists(f"{filename}"):
-                return {'status': 'ERROR', 'message': 'File sudah ada di user {}' .format(username_to)}
+                os.chdir('../../')
+                return {'status': 'ERROR', 'message': 'File sudah ada di user {}'.format(username_to)}
             fp_new = open(filename, 'wb+')
             fp_new.write(isi_file)
             fp_new.close()
+            os.chdir('../../')
             return {'status': 'OK', 'message': 'File terkirim'}
         else:
+            os.chdir('../../')
             return {'status': 'ERROR', 'message': 'File tidak ada'}
+
+    def send_file_group(self, sessionid, groupid, filename):
+        if sessionid not in self.sessions:
+            return {'status': 'ERROR', 'message': 'Session Tidak Ditemukan'}
+        if groupid not in self.groups:
+            return {'status': 'ERROR', 'message': 'Group Tidak Ditemukan'}
+
+        username_from = self.sessions[sessionid]['username']
+        path_from = 'files/' + username_from + '/'
+
+        for member in self.groups[groupid]:
+            address = member.split("@")
+            username_to = address[0].strip()
+            if username_from == username_to:
+                continue
+            server_to = address[1].strip()
+            path_to = '../' + username_to + '/'
+            print(os.path.abspath(path_from))
+            os.chdir(path_from)
+
+            if os.path.exists(filename):
+                fp = open(f"{filename}", 'rb')
+                isi_file = fp.read()
+                fp.close()
+                os.chdir(path_to)
+                if os.path.exists(f"{filename}"):
+                    os.chdir('../../')
+                    return {'status': 'ERROR', 'message': 'File sudah ada di user {}'.format(username_to)}
+                fp_new = open(filename, 'wb+')
+                fp_new.write(isi_file)
+                fp_new.close()
+                os.chdir('../../')
+            else:
+                os.chdir('../../')
+                return {'status': 'ERROR', 'message': 'File tidak ada'}
+        return {'status': 'OK', 'message': 'File terkirim ke group {}'.format(groupid)}
+
+    def create_group(self, group_id, members):
+        if group_id in self.groups:
+            return {'status': 'ERROR', 'message': 'Group {} sudah ada'.format(group_id)}
+        self.groups[group_id] = []
+        user_member = members.split(',')
+        for user in user_member:
+            if user not in self.groups[group_id]:
+                self.groups[group_id].append(user)
+
+        return {'status': 'OK', 'message': 'Group {} dibuat'.format(group_id)}
 
 
 if __name__ == "__main__":

@@ -32,6 +32,8 @@ class ChatClient:
             elif command == 'connect':
                 server_id = j[1].strip()
                 return self.connect(server_id)
+            elif command == 'logout':
+                return self.logout()
             elif command == 'addserver':
                 server_id = j[1].strip()
                 server_ip = j[2].strip()
@@ -58,8 +60,20 @@ class ChatClient:
                 address = j[1].strip()
                 filename = j[2].strip()
                 return self.send_file(address, filename)
+            elif command == 'sendfilegroup':
+                groupid = j[1].strip()
+                filename = j[2].strip()
+                return self.send_file_group(groupid, filename)
             elif command == 'inbox':
                 return self.inbox()
+            elif command == 'register':
+                username = j[1].strip()
+                password = j[2].strip()
+                return self.register(username, password)
+            elif command == 'creategroup':
+                group_id = j[1].strip()
+                group_members = j[2].strip()
+                return self.create_group(group_id, group_members)
             else:
                 return "*Maaf, command tidak benar"
         except IndexError:
@@ -80,14 +94,33 @@ class ChatClient:
             self.sock.close()
             return {'status': 'ERROR', 'message': 'Gagal'}
 
+    def register(self, username, password):
+        message = "register {} {}\r\n".format(username, password)
+        result = self.sendstring(message)
+        if result['status'] == 'OK':
+            return 'User {} succesfully registered'.format(username)
+        else:
+            return 'Error: {}'.format(result['message'])
+
     def login(self, username, password):
+        if self.tokenid != '':
+            return "Error: another user already logged in"
         string = "auth {} {} \r\n" . format(username, password)
         result = self.sendstring(string)
         if result['status'] == 'OK':
             self.tokenid = result['tokenid']
             return "username {} logged in, token {} " .format(username, self.tokenid)
         else:
-            return "Error, {}" . format(result['message'])
+            return "Error: {}" . format(result['message'])
+
+    def logout(self):
+        string = "logout {}\r\n".format(self.tokenid)
+        result = self.sendstring(string)
+        if result['status'] == 'OK':
+            self.tokenid = ''
+            return "Logged out"
+        else:
+            return "Error: {}".format(result['message'])
 
     def connect(self, server_id):
         if self.tokenid == "":
@@ -133,12 +166,21 @@ class ChatClient:
     def inbox(self):
         if self.tokenid == "":
             return "Error, not authorized"
-        string = "inbox {} \r\n" . format(self.tokenid)
+
+        string = "inbox {}\r\n".format(self.tokenid)
         result = self.sendstring(string)
+
         if result['status'] == 'OK':
-            return "{}" . format(json.dumps(result['messages']))
+            formatted_string = ""
+
+            for sender, messages in result['messages'].items():
+                for message in messages:
+                    formatted_message = message["msg"].replace("\r\n", "").strip()
+                    formatted_string += f"{sender}: {formatted_message}\n"
+
+            return "{}".format(formatted_string)
         else:
-            return "Error: {}" . format(result['message'])
+            return "Error: {}".format(result['message'])
 
     def sendgroupmessage(self, group_id="xxx", message="xxx"):
         if self.tokenid == "":
@@ -157,6 +199,26 @@ class ChatClient:
         result = self.sendstring(string)
         if result['status'] == 'OK':
             return 'File {} sent to {}'.format(filename, address)
+        else:
+            return 'Error: {}'.format(result['message'])
+
+    def send_file_group(self, group_id, filename):
+        if self.tokenid == "":
+            return "Error: not authorized"
+        string = "sendfilegroup {} {} {}\r\n".format(self.tokenid, group_id, filename)
+        result = self.sendstring(string)
+        if result['status'] == 'OK':
+            return 'File {} sent to group {}'.format(filename, group_id)
+        else:
+            return 'Error: {}'.format(result['message'])
+
+    def create_group(self, group_id, members):
+        if self.tokenid == "":
+            return "Error: not authorized"
+        string = "creategroup {} {}\r\n".format(group_id, members)
+        result = self.sendstring(string)
+        if result['status'] == 'OK':
+            return 'Group {} created with member: {}'.format(group_id, members)
         else:
             return 'Error: {}'.format(result['message'])
 

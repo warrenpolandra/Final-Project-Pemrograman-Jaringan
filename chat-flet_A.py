@@ -16,7 +16,8 @@ def main(page):
             txt = cmd.value
             lv.controls.append(ft.Text(f"command: {txt}"))
             txt = cc.proses(txt)
-            lv.controls.append(ft.Text(f"result {cc.tokenid}: {txt}"))
+            lv.controls.append(ft.Text(f"{txt}"))
+            lv.controls.append(ft.Text())
             cmd.value = ""
             page.update()
 

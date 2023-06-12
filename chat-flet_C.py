@@ -3,7 +3,7 @@ from chatcli import *
 import flet as ft
 
 TARGET_IP = os.getenv("SERVER_IP") or "127.0.0.1"
-TARGET_PORT = os.getenv("SERVER_PORT") or "9000"
+TARGET_PORT = os.getenv("SERVER_PORT") or "9001"
 ON_WEB = os.getenv("ONWEB") or "1"
 
 
@@ -16,12 +16,12 @@ def main(page):
             txt = cmd.value
             lv.controls.append(ft.Text(f"command: {txt}"))
             txt = cc.proses(txt)
-            lv.controls.append(ft.Text(f"{txt}"))
+            lv.controls.append(ft.Text(f"{txt}\n"))
             lv.controls.append(ft.Text())
             cmd.value = ""
             page.update()
 
-    cc = ChatClient('B')
+    cc = ChatClient('C')
 
     lv = ft.ListView(expand=1, spacing=10, padding=20, auto_scroll=True)
     cmd = ft.TextField(label="Your command", on_submit=btn_click)
@@ -32,6 +32,6 @@ def main(page):
 
 if __name__ == '__main__':
     if ON_WEB == "1":
-        ft.app(target=main, view=ft.WEB_BROWSER, port=8551)
+        ft.app(target=main, view=ft.WEB_BROWSER, port=8552)
     else:
         ft.app(target=main)
