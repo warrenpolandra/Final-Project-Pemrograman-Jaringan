@@ -262,7 +262,7 @@ class Chat:
             return {'status': 'ERROR', 'message': 'Server Tidak Ada'}
         username_from = self.sessions[sessionid]['username']
         path_from = 'files/' + username_from + '/'
-        path_to = 'files/' + username_to + '/'
+        path_to = '../' + username_to + '/'
         os.chdir(path_from)
         logging.warning("filename:{}:".format(filename))
 
