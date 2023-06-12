@@ -264,6 +264,7 @@ class Chat:
         path_from = 'files/' + username_from + '/'
         path_to = 'files/' + username_to + '/'
         os.chdir(path_from)
+        logging.warning("filename:{}:".format(filename))
 
         if os.path.exists(filename):
             fp = open(f"{filename}", 'rb')
