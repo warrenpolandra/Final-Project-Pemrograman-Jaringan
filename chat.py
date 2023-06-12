@@ -261,8 +261,8 @@ class Chat:
         if server_id not in self.servers:
             return {'status': 'ERROR', 'message': 'Server Tidak Ada'}
         username_from = self.sessions[sessionid]['username']
-        path_from = username_from + '/'
-        path_to = username_to + '/'
+        path_from = 'files/' + username_from + '/'
+        path_to = 'files/' + username_to + '/'
         os.chdir(path_from)
 
         if os.path.exists(filename):
@@ -277,8 +277,6 @@ class Chat:
             return {'status': 'OK', 'message': 'File terkirim'}
         else:
             return {'status': 'ERROR', 'message': 'File tidak ada'}
-
-
 
 
 if __name__ == "__main__":
