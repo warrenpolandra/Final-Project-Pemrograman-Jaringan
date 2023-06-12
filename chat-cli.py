@@ -118,7 +118,10 @@ class ChatClient:
         string = "inbox {} \r\n" . format(self.tokenid)
         result = self.sendstring(string)
         if result['status'] == 'OK':
-            return "{}" . format(json.dumps(result['messages']))
+            message = json.loads(result['messages'])
+            lineker = message['lineker']
+            return "{}" . format(result['messages'])
+            # return "{}" . format(lineker)
         else:
             return "Error: {}" . format(result['message'])
 
