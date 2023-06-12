@@ -6,6 +6,7 @@ import logging
 from queue import Queue
 import threading
 import socket
+import traceback
 
 
 class ServerToServerThread(threading.Thread):
@@ -137,9 +138,13 @@ class Chat:
         if server_id in self.running_servers:
             return {'status': 'ERROR', 'message': 'Server {} is already connected'.format(server_id)}
         else:
-            self.servers[server_id].start()
-            self.running_servers.append(server_id)
-            return {'status': 'OK'}
+            try:
+                self.servers[server_id].start()
+                self.running_servers.append(server_id)
+                return {'status': 'OK'}
+            except:
+                trace = traceback.format_exc()
+                return {'status': 'ERROR', 'message': trace}
 
     def add_server(self, server_id, server_ip, server_port):
         if server_id in self.servers:
