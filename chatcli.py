@@ -162,6 +162,16 @@ class ChatClient:
             return "Message sent to server {}".format(serverid)
         else:
             return "Error: {}".format(result['message'])
+        
+    # def send_message_to_server_ngrox(self, serverid, usernameto, message):
+    #     if self.tokenid == "":
+    #         return "Error, not authorized"
+    #     string = "sendserver {} {} {} {}\r\n".format(self.tokenid, serverid, usernameto, message)
+    #     result = self.sendstring(string)
+    #     if result['status'] == 'OK':
+    #         return "Message sent to server {}".format(serverid)
+    #     else:
+    #         return "Error: {}".format(result['message'])
 
     def inbox(self):
         if self.tokenid == "":
