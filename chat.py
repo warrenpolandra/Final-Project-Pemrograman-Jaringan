@@ -86,6 +86,11 @@ class Chat:
             elif command == 'connect':
                 server_id = j[1].strip()
                 return self.connect(server_id)
+            elif command == 'addserver':
+                server_id = j[1].strip()
+                server_ip = j[2].strip()
+                server_port = j[3].strip()
+
             elif command == 'sendserver':
                 sessionid = j[1].strip()
                 server_id = j[2].strip()
@@ -135,6 +140,9 @@ class Chat:
             self.servers[server_id].start()
             self.running_servers.append(server_id)
             return {'status': 'OK'}
+
+    def add_server(self, server_id, server_ip, server_port):
+        self.servers[server_id] = ServerToServerThread(self, server_ip, server_port)
 
     def send_message(self, sessionid, username_from, username_dest, message):
         if sessionid not in self.sessions:

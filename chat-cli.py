@@ -32,6 +32,11 @@ class ChatClient:
             elif command == 'connect':
                 server_id = j[1].strip()
                 return self.connect(server_id)
+            elif command == 'addserver':
+                server_id = j[1].strip()
+                server_ip = j[2].strip()
+                server_port = int(j[3].strip())
+                return self.add_server(server_id, server_ip, server_port)
             elif command == 'send':
                 address = j[1].strip().split('@')
                 usernameto = address[0].strip()
@@ -90,12 +95,21 @@ class ChatClient:
         else:
             return "Error: {}".format(result['message'])
 
+    def add_server(self, server_id, server_ip, server_port):
+        if self.tokenid == "":
+            return "Error: not authorized"
+        string = "addserver {} {} {}\r\n".format(server_id, server_ip, server_port)
+        result = self.sendstring(string)
+        if result['status'] == 'OK':
+            return "Server {}:{} added with id: {}".format(server_ip, server_port, server_id)
+        else:
+            return "Error: {}".format(result['message'])
+
     def send_message(self, usernameto="xxx", message="xxx"):
         if self.tokenid == "":
-            return "Error, not authorized"
+            return "Error: not authorized"
         string = "send {} {} {}\r\n" . format(
             self.tokenid, usernameto, message)
-        print(string)
         result = self.sendstring(string)
         if result['status'] == 'OK':
             return "message sent to {}" . format(usernameto)
@@ -120,8 +134,8 @@ class ChatClient:
         if result['status'] == 'OK':
             message = json.loads(result['messages'])
             lineker = message['lineker']
-            return "{}" . format(result['messages'])
-            # return "{}" . format(lineker)
+            # return "{}" . format(json.dumps(result['messages']))
+            return "{}" . format(lineker)
         else:
             return "Error: {}" . format(result['message'])
 
