@@ -164,5 +164,5 @@ if __name__ == "__main__":
 
     cc = ChatClient(server)
     while True:
-        cmdline = input("Command: ")
+        cmdline = input("\nCommand: ")
         print(cc.proses(cmdline))
