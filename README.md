@@ -9,3 +9,5 @@ Anggota kelompok
 - 5025201053: RAFAEL ASI KRISTANTO TAMBUNAN
 - 5025201151: GERY FEBRIAN SETYARA
 - 5025201165: GABRIEL SITANGGANG
+
+Protokol bisa dilihat pada [Protokol](https://github.com/warrenpolandra/Final-Project-Pemrograman-Jaringan/blob/main/protokol.md)
